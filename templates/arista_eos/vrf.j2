@@ -1,0 +1,4 @@
+{% for vrf in rel_vrf_to_device_map %}
+vrf definition {{ vrf.name }}
+ip routing vrf {{ vrf.name }}
+{% endfor %}

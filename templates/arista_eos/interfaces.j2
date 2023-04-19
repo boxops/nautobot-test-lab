@@ -1,0 +1,37 @@
+{% for intf in interfaces %}
+interface {{ intf['name'] }}
+{% if intf['description'] %}
+ description "{{ intf['description'] }}"
+{% endif %}
+{% if intf['enabled'] == true %}
+ no shutdown
+{% else %}
+ shutdown
+{% endif %}
+{% if intf['ip_addresses'] %}
+{% if 'Ethernet' in intf['name'] %}
+ no switchport
+{% endif %}
+{% if intf.ip_addresses[0].vrf %}
+{% if intf.ip_addresses[0].vrf.name != 'default' %}
+ vrf {{intf.ip_addresses[0].vrf.name}}
+{% endif %}{% endif %}
+{% if 'Management' in intf['name'] %}
+ no lldp receive
+{% endif %}
+{% if intf['mode'] == 'TAGGED' %}
+ switchport mode trunk
+ switchport trunk allowed vlan {% for vlan in intf['tagged_vlans'] %}{{ vlan['vid'] }}{% if not loop.last %},{% endif %}{% endfor %}
+{% if intf.untagged_vlan.vid is defined %}
+ switchport access vlan {{ intf.untagged_vlan.vid }}
+{% endif %}
+{% endif %}
+{% if intf['mode'] == 'ACCESS' %}
+ switchport mode access
+ switchport access vlan {{ intf.untagged_vlan.vid }}
+{% endif %}
+{% if intf['mtu'] %}
+ mtu {{ intf['mtu'] }}
+{% endif %}
+!
+{% endfor %}

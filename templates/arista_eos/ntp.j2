@@ -1,0 +1,5 @@
+{% if config_context.ntp.servers %}
+{% for server in config_context.ntp.servers %}
+ntp server vrf management {{ server }}
+{% endfor %}
+{% endif %}

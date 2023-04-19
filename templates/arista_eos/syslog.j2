@@ -1,0 +1,5 @@
+{% if config_context.syslog_servers %}
+{% for server in config_context.syslog_servers %}
+logging vrf management host {{ server.host }} 514
+{% endfor %}
+{% endif %}

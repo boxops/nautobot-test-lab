@@ -1,0 +1,42 @@
+router ospf 1
+   network 0.0.0.0/0 area 0.0.0.0
+   max-lsa 12000
+   exit
+!
+router bgp {{ config_context.router_bgp.local_asn }} 
+   no bgp default ipv4-unicast
+   maximum-paths 4
+{% if device_role.name == 'Spine' %}
+   bgp cluster-id {{ config_context.router_bgp.cluster_id }}
+   neighbor leaf peer group
+   neighbor leaf remote-as 65000
+   neighbor leaf update-source Loopback0
+   neighbor leaf route-reflector-client
+   neighbor leaf send-community extended
+   neighbor leaf maximum-routes 12000 
+{% if config_context.router_bgp.evpn_overlay_neighbors is defined %}
+{% for neighbor in config_context.router_bgp.evpn_overlay_neighbors %}
+   neighbor {{ neighbor.address }} peer group leaf
+   neighbor {{ neighbor.address }} description {{ neighbor.description }} 
+{% endfor %}
+ !
+   address-family evpn
+      neighbor leaf activate
+{% endif %}
+{% endif %}
+{% if device_role.name == 'Leaf' %}
+   neighbor spine peer group
+   neighbor spine remote-as 65000
+   neighbor spine update-source Loopback0
+   neighbor spine send-community extended
+   neighbor spine maximum-routes 12000 
+{% if config_context.router_bgp.evpn_overlay_neighbors is defined %}
+{% for neighbor in config_context.router_bgp.evpn_overlay_neighbors %}
+   neighbor {{ neighbor.address }} peer group spine
+   neighbor {{ neighbor.address }} description {{ neighbor.description }} 
+{% endfor %}
+ !
+ address-family evpn
+    neighbor spine activate
+{% endif %}
+{% endif %}
