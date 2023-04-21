@@ -16,6 +16,8 @@ interface {{ intf['name'] }}
 {% if intf.ip_addresses[0].vrf.name != 'default' %}
  vrf {{intf.ip_addresses[0].vrf.name}}
 {% endif %}{% endif %}
+ ip address {{ intf.ip_addresses[0].address }}
+{% endif %}
 {% if 'Management' in intf['name'] %}
  no lldp receive
 {% endif %}
